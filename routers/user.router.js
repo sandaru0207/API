@@ -28,6 +28,7 @@ router.post('/moveorders',UserController.moveorders);
 router.get('/getdelivers',UserController.getdelivers);
 router.get('/getoverview',UserController.getoverview);
 router.get('/getdeliveroverview',UserController.getdeliveroverview);
+router.get('/getcompletedoverview',UserController.getcompletedoverview);
 router.get('/getUserCount',UserController.getUserCount);
 
 

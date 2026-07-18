@@ -415,17 +415,67 @@ exports.removedeliver = async (req, res) => {
             return res.status(400).json({ status: false, error: 'Order is required' });
         }
         console.log(_id);
-        const collection = db.collection('deliver');
-        const result = await collection.deleteOne({ _id: new ObjectId(_id) });
+        const deliverCollection = db.collection('deliver');
+        const completedCollection = db.collection('completed');
 
-        if (result.deletedCount === 0) {
+        const order = await deliverCollection.findOne({_id: new ObjectId(_id)});
+
+        if (!order) {
             return res.status(404).json({ status: false, error: 'Order not found' });
         }
 
-        res.status(200).json({ status: true, success: 'Deliver order completed/deleted successfully' });
+        await completedCollection.insertOne(order);
+        await deliverCollection.deleteOne({_id: new ObjectId(_id)});
+
+        res.status(200).json({ status: true, success: 'Order completed and archived successfully' });
     } catch (error) {
         console.error("Error details:", error); 
-        res.status(500).json({ status: false, error: 'Error completing/deleting Deliver order', details: error });
+        res.status(500).json({ status: false, error: 'Error completing order', details: error });
+    }
+};
+
+exports.getcompletedoverview = async (req, res) => {
+    try {
+        const collection = db.collection('completed');
+
+        const result = await collection.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalVegCount: { $sum: "$veg_count" },
+                    totalEggCount: { $sum: "$egg_count" },
+                    totalChickenCount: { $sum: "$chicken_count" },
+                    totalRiceCount: { $sum: "$rice_count" },
+                    totalKottuCount: { $sum: "$kottu_count" },
+                    totalFishCount: { $sum: "$fish_count" },
+                    vegPrice: { $first: "$veg_price" },
+                    eggPrice: { $first: "$egg_price" },
+                    chickenPrice: { $first: "$chicken_price" },
+                    ricePrice: { $first: "$rice_price" },
+                    kottuPrice: { $first: "$kottu_price" },
+                    fishPrice: { $first: "$fish_price" }
+                }
+            }
+        ]).toArray();
+
+        const response = result.length > 0 ? result[0] : {
+            totalVegCount: 0,
+            vegPrice: 0,
+            totalEggCount: 0,
+            eggPrice: 0,
+            totalChickenCount: 0,
+            chickenPrice: 0,
+            totalRiceCount: 0,
+            ricePrice: 0,
+            totalKottuCount: 0,
+            kottuPrice: 0,
+            totalFishCount: 0,
+            fishPrice: 0
+        };
+
+        res.status(200).json({ status: true, ...response });
+    } catch (error) {
+        res.status(500).json({ status: false, message: 'Error fetching total completed food counts and prices', error: error });
     }
 };
 
