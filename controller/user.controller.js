@@ -95,7 +95,14 @@ exports.getprodetails = async (req,res)=>{
 
 exports.getuserorders = async (req,res)=>{
     try{
-        const {student_id} = req.body;
+        let {student_id, mobile_number} = req.body;
+        if (!student_id && mobile_number) {
+            const usersCollection = db.collection('users');
+            const user = await usersCollection.findOne({mobile_number: mobile_number});
+            if (user) {
+                student_id = user.student_id;
+            }
+        }
         
         const collection = db.collection('orders');
         const orders = await collection.find({student_id: student_id}).toArray();
@@ -215,7 +222,26 @@ exports.updatefoodlist = async(req, res) => {
 exports.getorders = async (req,res)=>{
     try{
         const collection = db.collection('orders');
-        const orders = await collection.find({}).toArray();
+        const orders = await collection.aggregate([
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'student_id',
+                    foreignField: 'student_id',
+                    as: 'user_info'
+                }
+            },
+            {
+                $addFields: {
+                    mobile_number: { $ifNull: [ { $arrayElemAt: ['$user_info.mobile_number', 0] }, "" ] }
+                }
+            },
+            {
+                $project: {
+                    user_info: 0
+                }
+            }
+        ]).toArray();
         res.status(200).json(orders);
     } catch(error){
         res.status(500).json({message: 'Error fetching menu details', error: error});
@@ -253,7 +279,26 @@ exports.moveorders = async (req,res) =>{
 exports.getdelivers = async (req,res)=>{
     try{
         const collection = db.collection('deliver');
-        const orders = await collection.find({}).toArray();
+        const orders = await collection.aggregate([
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'student_id',
+                    foreignField: 'student_id',
+                    as: 'user_info'
+                }
+            },
+            {
+                $addFields: {
+                    mobile_number: { $ifNull: [ { $arrayElemAt: ['$user_info.mobile_number', 0] }, "" ] }
+                }
+            },
+            {
+                $project: {
+                    user_info: 0
+                }
+            }
+        ]).toArray();
         res.status(200).json(orders);
     } catch(error){
         res.status(500).json({message: 'Error fetching menu details', error: error});
