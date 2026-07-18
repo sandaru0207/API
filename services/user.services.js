@@ -4,21 +4,21 @@ const AdminModel = require('../model/admin.model');
 const jwt = require('jsonwebtoken');
 
 class UserService{
-    static async register(mobile_number,name,faculty,address,password){
+    static async register(student_id,mobile_number,name,faculty,address,password){
         try{
-            const createUser = new UserModel({mobile_number,name,faculty,address,password});
+            const createUser = new UserModel({student_id,mobile_number,name,faculty,address,password});
             return await createUser.save();
         }catch(error){
             if(error.code === 11000){
-                throw new Error('Mobile Number Already in use');
+                throw new Error('Student ID or Mobile Number Already in use');
             }
             throw error;
         }
     }
 
-    static async checkuser(mobile_number){
+    static async checkuser(student_id){
         try{
-            return await UserModel.findOne({mobile_number});
+            return await UserModel.findOne({student_id});
         } catch(error){
             throw error
         }
@@ -36,9 +36,9 @@ class UserService{
         return jwt.sign(tokenData,secretKey,{expiresIn:jwt_expire})
     }
 
-    static async placeorder(mobile_number,total,veg_count,veg_price,egg_count,egg_price,chicken_count,chicken_price,rice_count,rice_price,kottu_count,kottu_price,fish_count,fish_price){
+    static async placeorder(student_id,total,veg_count,veg_price,egg_count,egg_price,chicken_count,chicken_price,rice_count,rice_price,kottu_count,kottu_price,fish_count,fish_price){
         try{
-            const creteOrder = new OrderModel({mobile_number,total,veg_count,veg_price,egg_count,egg_price,chicken_count,chicken_price,rice_count,rice_price,kottu_count,kottu_price,fish_count,fish_price});
+            const creteOrder = new OrderModel({student_id,total,veg_count,veg_price,egg_count,egg_price,chicken_count,chicken_price,rice_count,rice_price,kottu_count,kottu_price,fish_count,fish_price});
             return await creteOrder.save();
         }catch(error){         
             throw error;

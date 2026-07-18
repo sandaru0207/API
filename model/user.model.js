@@ -5,10 +5,14 @@ const bcrypt = require('bcrypt');
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
-    mobile_number:{
+    student_id:{
         type:String,
         required : true,
         unique : true,
+    },
+    mobile_number:{
+        type:String,
+        required : true,
     },
     name:{
         type:String,

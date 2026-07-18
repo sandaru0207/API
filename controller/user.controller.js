@@ -6,18 +6,18 @@ const { ObjectId } = require('mongodb');
 exports.register = async(req,res,next)=>{
     try{
         
-        const {mobile_number,name,faculty,address,password} = req.body;
+        const {student_id,mobile_number,name,faculty,address,password} = req.body;
         
-        if (!mobile_number || !name || !faculty || !address || !password) {
+        if (!student_id || !mobile_number || !name || !faculty || !address || !password) {
             return res.status(400).send({ error: 'All fields are required' });
         }
 
-        const successRes = await UserService.register(mobile_number,name,faculty,address,password);
+        const successRes = await UserService.register(student_id,mobile_number,name,faculty,address,password);
 
         res.json({status:true, success:"User Registered Successfully"});
         
     }catch(error){
-        if(error.message === "Mobile Number Already in use"){
+        if(error.message === "Student ID or Mobile Number Already in use"){
             res.status(400).json({status: false, error: error.message});
         }else{
             throw(error);
@@ -27,9 +27,9 @@ exports.register = async(req,res,next)=>{
 
 exports.login = async(req,res,next)=>{
     try {
-        const {mobile_number,password} = req.body;
+        const {student_id,password} = req.body;
 
-        const user = await UserService.checkuser(mobile_number);
+        const user = await UserService.checkuser(student_id);
 
         if(!user){
             return res.status(400).json({status:false, error: 'User does not exist'});
@@ -41,7 +41,7 @@ exports.login = async(req,res,next)=>{
             return res.status(400).json({status: false, error:"Password Invalid"});
         }
 
-        let tokenData = {_id:user._id, mobile_number:user.mobile_number};
+        let tokenData = {_id:user._id, student_id:user.student_id};
 
         const token = await UserService.genarateToken(tokenData,"secretKey",'1h');
 
@@ -65,9 +65,9 @@ exports.getmenu = async (req,res)=>{
 exports.placeorder = async(req,res,next)=>{
     try{
         
-        const {mobile_number,total,veg_count,veg_price,egg_count,egg_price,chicken_count,chicken_price,rice_count,rice_price,kottu_count,kottu_price,fish_count,fish_price} = req.body;
+        const {student_id,total,veg_count,veg_price,egg_count,egg_price,chicken_count,chicken_price,rice_count,rice_price,kottu_count,kottu_price,fish_count,fish_price} = req.body;
         
-        const successRes = await UserService.placeorder(mobile_number,total,veg_count,veg_price,egg_count,egg_price,chicken_count,chicken_price,rice_count,rice_price,kottu_count,kottu_price,fish_count,fish_price);
+        const successRes = await UserService.placeorder(student_id,total,veg_count,veg_price,egg_count,egg_price,chicken_count,chicken_price,rice_count,rice_price,kottu_count,kottu_price,fish_count,fish_price);
 
         res.json({status:true, success:"Order placed Successfully"});
         
@@ -79,10 +79,10 @@ exports.placeorder = async(req,res,next)=>{
 
 exports.getprodetails = async (req,res)=>{
     try{
-        const {mobile_number} = req.body;
+        const {student_id} = req.body;
 
         const collection = db.collection('users');
-        const user = await collection.findOne({mobile_number: mobile_number});
+        const user = await collection.findOne({student_id: student_id});
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
           }
@@ -95,10 +95,10 @@ exports.getprodetails = async (req,res)=>{
 
 exports.getuserorders = async (req,res)=>{
     try{
-        const {mobile_number} = req.body;
+        const {student_id} = req.body;
         
         const collection = db.collection('orders');
-        const orders = await collection.find({mobile_number: mobile_number}).toArray();
+        const orders = await collection.find({student_id: student_id}).toArray();
         res.status(200).json(orders);
     } catch(error){
         res.status(500).json({message: 'Error fetching menu details', error: error});
@@ -143,14 +143,14 @@ exports.getusers = async (req,res)=>{
 
 exports.removeuser = async (req, res) => {
     try {
-        const { mobile_number } = req.body;
+        const { student_id } = req.body;
 
-        if (!mobile_number) {
-            return res.status(400).json({ status: false, error: 'Mobile number is required' });
+        if (!student_id) {
+            return res.status(400).json({ status: false, error: 'Student ID is required' });
         }
 
         const collection = db.collection('users');
-        const result = await collection.deleteOne({ mobile_number: mobile_number });
+        const result = await collection.deleteOne({ student_id: student_id });
 
         if (result.deletedCount === 0) {
             return res.status(404).json({ status: false, error: 'User not found' });

@@ -4,7 +4,7 @@ const db = require('../config/db');
 const { Schema } = mongoose;
 
 const orderSchema = new Schema({
-    mobile_number:{
+    student_id:{
         type:String,
         required : true,
         unique : false,
