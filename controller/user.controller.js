@@ -407,3 +407,26 @@ exports.getUserCount = async (req, res) => {
     }
 };
 
+exports.removedeliver = async (req, res) => {
+    try {
+        const {_id} = req.body;
+
+        if (!_id) {
+            return res.status(400).json({ status: false, error: 'Order is required' });
+        }
+        console.log(_id);
+        const collection = db.collection('deliver');
+        const result = await collection.deleteOne({ _id: new ObjectId(_id) });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ status: false, error: 'Order not found' });
+        }
+
+        res.status(200).json({ status: true, success: 'Deliver order completed/deleted successfully' });
+    } catch (error) {
+        console.error("Error details:", error); 
+        res.status(500).json({ status: false, error: 'Error completing/deleting Deliver order', details: error });
+    }
+};
+
+

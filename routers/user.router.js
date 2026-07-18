@@ -21,6 +21,7 @@ router.post('/adminlogin',UserController.adminlogin);
 router.get('/getusers',UserController.getusers);
 router.delete('/removeuser',UserController.removeuser);
 router.delete('/removeorder',UserController.removeorder);
+router.delete('/removedeliver',UserController.removedeliver);
 router.post('/updatefoodlist',UserController.updatefoodlist);
 router.get('/getorders',UserController.getorders);
 router.post('/moveorders',UserController.moveorders);
